@@ -2,7 +2,6 @@ import { ow } from "./api";
 import { getCache, setCache } from "../store/cache";
 import type { OneCall } from "../types/weather";
 
-/** Tipos para endpoints 2.5 */
 export type CurrentWeather = {
   coord: { lat: number; lon: number };
   weather: Array<{
@@ -59,7 +58,6 @@ export type Forecast3h = {
   };
 };
 
-/** Geocoding: nombre -> lat/lon */
 export async function geocodeCity(q: string, limit = 5) {
   const { data } = await ow.get<
     Array<{
@@ -73,7 +71,6 @@ export async function geocodeCity(q: string, limit = 5) {
   return data;
 }
 
-/** Actual (2.5) con caché (2 min) */
 export async function getCurrent({
   lat,
   lon,
@@ -84,7 +81,6 @@ export async function getCurrent({
   const key = `current:${lat.toFixed(3)},${lon.toFixed(3)}`;
   const cached = getCache(key, 120);
   if (cached) return cached;
-
   const { data } = await ow.get<CurrentWeather>("/data/2.5/weather", {
     params: { lat, lon },
   });
@@ -92,7 +88,6 @@ export async function getCurrent({
   return data;
 }
 
-/** Forecast 5 días / cada 3h (2.5) con caché (5 min) */
 export async function getForecast({
   lat,
   lon,
@@ -103,7 +98,6 @@ export async function getForecast({
   const key = `forecast:${lat.toFixed(3)},${lon.toFixed(3)}`;
   const cached = getCache(key, 300);
   if (cached) return cached;
-
   const { data } = await ow.get<Forecast3h>("/data/2.5/forecast", {
     params: { lat, lon },
   });
@@ -111,11 +105,7 @@ export async function getForecast({
   return data;
 }
 
-/**
- * Shim de compatibilidad: "getOneCall"
- * Construye un objeto con la forma de tu tipo OneCall usando getCurrent + getForecast (2.5),
- * para no tocar City/CityCard. (Hourly=3h; Daily=agregado aprox.)
- */
+/** Shim OneCall p/ no tocar City/CityCard */
 export async function getOneCall({
   lat,
   lon,
@@ -128,7 +118,6 @@ export async function getOneCall({
     getForecast({ lat, lon }),
   ]);
 
-  // hourly: próximos 8 pasos de 3h = ~24h
   const hourly = forecast.list.slice(0, 8).map((it) => ({
     dt: it.dt,
     temp: it.main.temp,
@@ -142,16 +131,11 @@ export async function getOneCall({
     weather: it.weather,
   }));
 
-  // DAILY: agregamos por día y añadimos sunrise/sunset requeridos por el tipo OneCall
-  const baseSunrise = current.sys.sunrise; // forecast.city no trae sunrise/sunset en 2.5
+  const baseSunrise = current.sys.sunrise;
   const baseSunset = current.sys.sunset;
-
   const ymd = (d: Date) => d.toISOString().slice(0, 10);
-  const dayStart = (ymdStr: string) =>
-    new Date(ymdStr + "T00:00:00Z").getTime() / 1000;
-
-  const baseYMD = ymd(new Date(current.dt * 1000));
-  const baseStart = dayStart(baseYMD);
+  const dayStart = (s: string) => new Date(s + "T00:00:00Z").getTime() / 1000;
+  const baseStart = dayStart(ymd(new Date(current.dt * 1000)));
 
   type DailyAgg = {
     dt: number;
@@ -174,21 +158,18 @@ export async function getOneCall({
     pop: number;
     weather: { id: number; main: string; description: string; icon: string }[];
   };
-
   const dailyMap = new Map<string, DailyAgg>();
 
   for (const it of forecast.list) {
     const d = new Date(it.dt * 1000);
     const key = ymd(d);
-    const offsetDays = Math.round((dayStart(key) - baseStart) / 86400); // desplazamiento diario aprox
-
-    const sunrise = baseSunrise + offsetDays * 86400;
-    const sunset = baseSunset + offsetDays * 86400;
-
+    const offset = Math.round((dayStart(key) - baseStart) / 86400);
+    const sunrise = baseSunrise + offset * 86400;
+    const sunset = baseSunset + offset * 86400;
     const t = it.main.temp;
-    const existing = dailyMap.get(key);
 
-    if (!existing) {
+    const ex = dailyMap.get(key);
+    if (!ex) {
       dailyMap.set(key, {
         dt: it.dt,
         sunrise,
@@ -204,15 +185,14 @@ export async function getOneCall({
         weather: it.weather,
       });
     } else {
-      existing.temp.min = Math.min(existing.temp.min, t);
-      existing.temp.max = Math.max(existing.temp.max, t);
-      existing.pop = Math.max(existing.pop, it.pop ?? 0);
+      ex.temp.min = Math.min(ex.temp.min, t);
+      ex.temp.max = Math.max(ex.temp.max, t);
+      ex.pop = Math.max(ex.pop, it.pop ?? 0);
     }
   }
-
   const daily = Array.from(dailyMap.values()).slice(0, 8);
 
-  const oc: OneCall = {
+  return {
     lat: current.coord.lat,
     lon: current.coord.lon,
     timezone: forecast.city?.name || "",
@@ -234,6 +214,4 @@ export async function getOneCall({
     hourly,
     daily,
   };
-
-  return oc;
 }

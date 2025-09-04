@@ -87,10 +87,10 @@ export default function CityCard({
         <div className="text-sm text-zinc-500">{w?.description}</div>
         {!compact && (
           <div className="ml-auto grid grid-cols-2 gap-x-6 text-sm">
-            <div>💧 Humedad: {c.humidity}%</div>
-            <div>🌬️ Viento: {round1(c.wind_speed)} m/s</div>
+            <div>💧 {c.humidity}%</div>
+            <div>🌬️ {round1(c.wind_speed)} m/s</div>
             <div>🌡️ Sensación: {round1(c.feels_like)}°C</div>
-            <div>☁️ Nubes: {c.clouds}%</div>
+            <div>☁️ {c.clouds}%</div>
           </div>
         )}
       </div>

@@ -5,23 +5,31 @@ import CityCard from "../components/CityCard";
 export default function Home() {
   const favs = useFavorites();
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-xl font-semibold">Busca ciudades y guárdalas</h2>
-        <CitySearch />
-      </div>
-
-      {favs.items.length > 0 ? (
-        <div className="grid gap-4">
-          {favs.items.map((c, i) => (
-            <CityCard key={`${c.lat},${c.lon}-${i}`} {...c} compact />
-          ))}
-        </div>
-      ) : (
-        <p className="text-sm text-zinc-500">
-          Aún no tienes favoritos. Busca una ciudad y pulsa “Guardar”.
+    <div className="space-y-8">
+      <section className="text-center">
+        <h2 className="text-3xl md:text-4xl font-bold">Busca una ciudad</h2>
+        <p className="mt-2 text-sm text-zinc-500">
+          Añádela a favoritos y consulta su pronóstico.
         </p>
-      )}
+        <div className="mt-6 flex items-center justify-center">
+          <CitySearch />
+        </div>
+      </section>
+
+      <section>
+        <h3 className="font-semibold mb-3">⭐ Favoritos</h3>
+        {favs.items.length === 0 ? (
+          <p className="text-sm text-zinc-500">
+            Aún no hay favoritos. Busca y guarda una ciudad.
+          </p>
+        ) : (
+          <div className="grid gap-4">
+            {favs.items.map((c, i) => (
+              <CityCard key={`${c.lat},${c.lon}-${i}`} {...c} compact />
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 }
