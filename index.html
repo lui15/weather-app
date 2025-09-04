@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Weather-App</title>
 
-    <!-- Tailwind dark-mode por clase -->
+    <!-- Tailwind: dark-mode por clase -->
     <meta name="color-scheme" content="light dark" />
 
-    <!-- Aplica el tema ANTES de pintar (sin parpadeo) -->
+    <!-- Aplica el tema ANTES de pintar (evita parpadeo) -->
     <script>
       (function () {
         try {
@@ -24,15 +24,8 @@
       })();
     </script>
   </head>
-
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-
-    <!-- ❌ ELIMINADO: botón flotante y su script -->
-    <!--
-    <button id="theme-toggle">Cambiar tema</button>
-    <script> ... </script>
-    -->
   </body>
 </html>
