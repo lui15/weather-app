@@ -20,12 +20,14 @@ export default function ToggleTheme() {
 
   return (
     <button
-      onClick={() => setDark((v) => !v)}
-      className="text-sm px-3 py-1 rounded-full border border-zinc-300 dark:border-zinc-700"
       aria-pressed={dark}
-      title="Cambiar tema"
+      onClick={() => setDark((v) => !v)}
+      className="px-3 py-1 text-sm rounded-full border
+                 bg-white text-zinc-900 border-zinc-300 hover:bg-zinc-100
+                 dark:bg-zinc-900 dark:text-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800
+                 transition"
     >
-      {dark ? "🌙 Dark" : "☀️ Light"}
+      Cambiar tema
     </button>
   );
 }
