@@ -10,6 +10,7 @@ export default function Landing() {
                          dark:border-zinc-800/60 dark:bg-black/70"
       >
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+          {/* Logo → Landing */}
           <Link to="/" className="font-semibold">
             Weather-App
           </Link>
@@ -27,7 +28,7 @@ export default function Landing() {
               Favorito
             </Link>
           </nav>
-          <ToggleTheme /> {/* ← ÚNICO botón de tema */}
+          <ToggleTheme /> {/* ← ÚNICO botón */}
         </div>
       </header>
 
@@ -38,6 +39,8 @@ export default function Landing() {
             <br />
             Consulta el pronóstico mundial.
           </h1>
+
+          {/* Botón que navega a /feed e invierte colores */}
           <div className="mt-6">
             <Link
               to="/feed"
@@ -50,6 +53,7 @@ export default function Landing() {
           </div>
         </section>
 
+        {/* Clima actual de Madrid */}
         <section className="flex items-center justify-center pb-24">
           <HeroMadrid />
         </section>
