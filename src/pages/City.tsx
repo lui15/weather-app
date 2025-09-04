@@ -12,6 +12,7 @@ import {
 import EmptyState from "../components/EmptyState";
 import HourlyChart from "../components/HourlyChart";
 import DailyList from "../components/DailyList";
+import { useFavorites } from "../store/favorites";
 
 export default function City() {
   const { coords, label } = useParams<{ coords: string; label?: string }>();
@@ -21,15 +22,14 @@ export default function City() {
     error: string;
     data: OneCall | null;
   }>({ loading: true, error: "", data: null });
+  const favs = useFavorites();
 
   useEffect(() => {
     let alive = true;
     getOneCall({ lat, lon })
-      .then(
-        (data: any) => alive && setState({ loading: false, error: "", data })
-      )
+      .then((data) => alive && setState({ loading: false, error: "", data }))
       .catch(
-        (e: any) =>
+        (e) =>
           alive &&
           setState({ loading: false, error: e?.message ?? "Error", data: null })
       );
@@ -45,16 +45,23 @@ export default function City() {
   const oc = state.data;
   const c = oc.current;
   const w = c.weather?.[0];
+  const pretty = label ? decodeLabel(label) : `${lat}, ${lon}`;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <h2 className="text-xl font-semibold">
-          {label ? decodeLabel(label) : `${lat}, ${lon}`}
-        </h2>
+        <h2 className="text-xl font-semibold">{pretty}</h2>
         <span className="text-sm text-zinc-500">
           {oc.timezone} · {fromUnix(c.dt)}
         </span>
+        <button
+          onClick={() =>
+            favs.toggle({ name: pretty.split(",")[0], country: "", lat, lon })
+          }
+          className="ml-auto px-3 py-1 text-sm rounded-full border"
+        >
+          {favs.isFav(lat, lon) ? "★ Quitar de favoritos" : "☆ Guardar"}
+        </button>
       </div>
 
       <div className="rounded-2xl border p-4 bg-white dark:bg-zinc-800">
@@ -72,7 +79,7 @@ export default function City() {
             <div>💧 {c.humidity}%</div>
             <div>🌬️ {round1(c.wind_speed)} m/s</div>
             <div>☁️ {c.clouds}%</div>
-            <div>🔻 Presión: {c.pressure} hPa</div>
+            <div>🔻 {c.pressure} hPa</div>
           </div>
         </div>
       </div>

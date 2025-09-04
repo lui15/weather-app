@@ -1,13 +1,38 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React + TS</title>
+    <title>Weather-App</title>
+
+    <!-- Tailwind dark-mode por clase -->
+    <meta name="color-scheme" content="light dark" />
+
+    <!-- Aplica el tema ANTES de pintar (sin parpadeo) -->
+    <script>
+      (function () {
+        try {
+          const saved = localStorage.getItem("theme");
+          const prefers =
+            window.matchMedia &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches;
+          const dark = saved ? saved === "dark" : prefers;
+          if (dark) document.documentElement.classList.add("dark");
+          else document.documentElement.classList.remove("dark");
+        } catch {}
+      })();
+    </script>
   </head>
+
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+
+    <!-- ❌ ELIMINADO: botón flotante y su script -->
+    <!--
+    <button id="theme-toggle">Cambiar tema</button>
+    <script> ... </script>
+    -->
   </body>
 </html>
